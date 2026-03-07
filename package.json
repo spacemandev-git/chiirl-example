@@ -4,7 +4,8 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": "bun --hot src/server.ts",
+    "start": "bun index.ts",
+    "dev": "bun --hot index.ts",
     "serve": "bun src/server.ts",
     "db:setup": "bun src/db/setup.ts",
     "scrape": "bun skills/scrape/scripts/scrape.ts",

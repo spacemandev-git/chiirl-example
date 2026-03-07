@@ -97,7 +97,7 @@ async function sendSMS(to: string, body: string): Promise<boolean> {
   }
 }
 
-async function main() {
+export async function broadcast() {
   console.log("Starting daily broadcast...\n");
 
   const users = await getSubscribedUsers();
@@ -125,10 +125,14 @@ async function main() {
   }
 
   console.log(`\nBroadcast complete: ${sent} sent, ${skipped} skipped`);
-  process.exit(0);
 }
 
-main().catch((err) => {
-  console.error("Broadcast failed:", err);
-  process.exit(1);
-});
+// Allow running directly
+if (import.meta.main) {
+  broadcast()
+    .then(() => process.exit(0))
+    .catch((err) => {
+      console.error("Broadcast failed:", err);
+      process.exit(1);
+    });
+}

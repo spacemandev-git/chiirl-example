@@ -56,7 +56,7 @@ async function upsertEvents(events: ChiEvent[]): Promise<number> {
   return upserted;
 }
 
-async function main() {
+export async function scrape() {
   console.log("Starting parallel event scrape...\n");
 
   const [lumaEvents, meetupEvents] = await Promise.all([
@@ -72,11 +72,14 @@ async function main() {
 
   const upserted = await upsertEvents(allEvents);
   console.log(`Events upserted: ${upserted}`);
-
-  process.exit(0);
 }
 
-main().catch((err) => {
-  console.error("Scrape failed:", err);
-  process.exit(1);
-});
+// Allow running directly
+if (import.meta.main) {
+  scrape()
+    .then(() => process.exit(0))
+    .catch((err) => {
+      console.error("Scrape failed:", err);
+      process.exit(1);
+    });
+}
