@@ -1,0 +1,24 @@
+{
+  "name": "chiirl",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "bun --hot src/server.ts",
+    "serve": "bun src/server.ts",
+    "db:setup": "bun src/db/setup.ts",
+    "scrape": "bun skills/scrape/scripts/scrape.ts",
+    "broadcast": "bun skills/broadcast/scripts/broadcast.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/node": "^25.3.5"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "agent-browser": "^0.16.3",
+    "twilio": "^5.12.2"
+  }
+}
