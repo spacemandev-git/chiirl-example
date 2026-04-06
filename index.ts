@@ -1,6 +1,7 @@
 import { scrape } from "./skills/scrape/scripts/scrape";
 import { broadcast } from "./skills/broadcast/scripts/broadcast";
-import "./src/server"; // starts the redirect/click-tracking server
+import { pushNotify } from "./skills/broadcast/scripts/push-notify";
+import "./src/server"; // starts the health check server
 
 function runJob(name: string, fn: () => Promise<void>) {
   console.log(`[cron] Running ${name}...`);
@@ -10,11 +11,10 @@ function runJob(name: string, fn: () => Promise<void>) {
 }
 
 // --- Cron scheduling ---
-// Check every minute, fire jobs at the right times
 let lastScrapeHour = -1;
 let lastBroadcastDay = -1;
 
-const SCRAPE_INTERVAL_HOURS = 6; // Run scrape every 6 hours (0, 6, 12, 18)
+const SCRAPE_INTERVAL_HOURS = 6;
 const BROADCAST_HOUR_UTC = 14; // 8am CT = 14:00 UTC
 
 setInterval(() => {
@@ -28,12 +28,14 @@ setInterval(() => {
     runJob("scrape", scrape);
   }
 
-  // Broadcast once daily at 8am CT
+  // Broadcast once daily at 8am CT — email + push in parallel
   if (hour === BROADCAST_HOUR_UTC && day !== lastBroadcastDay) {
     lastBroadcastDay = day;
-    runJob("broadcast", broadcast);
+    runJob("broadcast", async () => {
+      await Promise.all([broadcast(), pushNotify()]);
+    });
   }
-}, 60_000); // check every minute
+}, 60_000);
 
 console.log(`[cron] Scrape scheduled every ${SCRAPE_INTERVAL_HOURS}h (UTC 0,6,12,18)`);
 console.log(`[cron] Broadcast scheduled daily at ${BROADCAST_HOUR_UTC}:00 UTC (8am CT)`);

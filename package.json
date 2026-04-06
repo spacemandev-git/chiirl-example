@@ -9,7 +9,8 @@
     "serve": "bun src/server.ts",
     "db:setup": "bun src/db/setup.ts",
     "scrape": "bun skills/scrape/scripts/scrape.ts",
-    "broadcast": "bun skills/broadcast/scripts/broadcast.ts"
+    "broadcast": "bun skills/broadcast/scripts/broadcast.ts",
+    "push-notify": "bun skills/broadcast/scripts/push-notify.ts"
   },
   "devDependencies": {
     "@types/bun": "latest",
@@ -20,6 +21,7 @@
   },
   "dependencies": {
     "agent-browser": "^0.16.3",
-    "twilio": "^5.12.2"
+    "resend": "^4.0.0",
+    "web-push": "^3.6.0"
   }
 }

@@ -1,19 +1,18 @@
 import sql from "../src/db";
 
-const PHONE = "+1";
-
 const sampleUsers = [
-  { name: "Alice", tags: ["tech", "startup", "networking"] },
-  { name: "Bob", tags: ["music", "arts", "social"] },
-  { name: "Charlie", tags: ["food", "health", "education"] },
+  { name: "Alice", email: "alice@example.com", tags: ["code-engineering", "fundraising", "networking"] },
+  { name: "Bob", email: "bob@example.com", tags: ["hangout", "product", "uiux-cx"] },
+  { name: "Charlie", email: "charlie@example.com", tags: ["marketing", "sales", "scaling"] },
 ];
 
 for (const user of sampleUsers) {
   await sql`
-    INSERT INTO users (phone, name, tags)
-    VALUES (${PHONE}, ${user.name}, ${`{${user.tags.join(",")}}`}::event_tag[])
+    INSERT INTO users (email, name, tags)
+    VALUES (${user.email}, ${user.name}, ${`{${user.tags.join(",")}}`}::event_tag[])
+    ON CONFLICT (email) DO NOTHING
   `;
-  console.log(`Inserted user: ${user.name} with tags: ${user.tags.join(", ")}`);
+  console.log(`Inserted user: ${user.name} (${user.email}) with tags: ${user.tags.join(", ")}`);
 }
 
 console.log("Done!");

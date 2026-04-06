@@ -1,7 +1,12 @@
 import db from "../../../src/db";
 import type { ChiEvent } from "../../../src/types";
 
-async function scrapeSource(source: "luma" | "meetup"): Promise<ChiEvent[]> {
+type ScrapableSource = "luma" | "meetup" | "eventbrite" | "pie";
+
+const ALL_SOURCES: ScrapableSource[] = ["luma", "meetup", "eventbrite", "pie"];
+const THREE_WEEKS_MS = 21 * 24 * 60 * 60 * 1000;
+
+async function scrapeSource(source: ScrapableSource): Promise<ChiEvent[]> {
   const scriptPath = import.meta.dir + "/scrape-source.ts";
   const proc = Bun.spawn(["bun", scriptPath, source], {
     stdout: "pipe",
@@ -14,6 +19,23 @@ async function scrapeSource(source: "luma" | "meetup"): Promise<ChiEvent[]> {
   const lines = stdout.trim().split("\n");
   const jsonLine = lines[lines.length - 1]!;
   return JSON.parse(jsonLine);
+}
+
+function filterToNextThreeWeeks(events: ChiEvent[]): ChiEvent[] {
+  const now = Date.now();
+  const cutoff = now + THREE_WEEKS_MS;
+  return events.filter((e) => {
+    const t = new Date(e.start_time).getTime();
+    return t >= now && t <= cutoff;
+  });
+}
+
+async function markPastEvents(): Promise<number> {
+  const result = await db`
+    UPDATE events SET status = 'past'
+    WHERE status = 'approved' AND start_time < NOW()
+  `;
+  return result.count;
 }
 
 async function upsertEvents(events: ChiEvent[]): Promise<number> {
@@ -59,19 +81,27 @@ async function upsertEvents(events: ChiEvent[]): Promise<number> {
 export async function scrape() {
   console.log("Starting parallel event scrape...\n");
 
-  const [lumaEvents, meetupEvents] = await Promise.all([
-    scrapeSource("luma"),
-    scrapeSource("meetup"),
-  ]);
+  const results = await Promise.all(
+    ALL_SOURCES.map((source) => scrapeSource(source))
+  );
 
-  console.log(`Luma: ${lumaEvents.length} events`);
-  console.log(`Meetup: ${meetupEvents.length} events`);
+  const allEvents: ChiEvent[] = [];
+  for (let i = 0; i < ALL_SOURCES.length; i++) {
+    const sourceEvents = results[i]!;
+    console.log(`${ALL_SOURCES[i]}: ${sourceEvents.length} events`);
+    allEvents.push(...sourceEvents);
+  }
 
-  const allEvents = [...lumaEvents, ...meetupEvents];
-  console.log(`Total: ${allEvents.length} events\n`);
+  const filtered = filterToNextThreeWeeks(allEvents);
+  console.log(`\nTotal scraped: ${allEvents.length}`);
+  console.log(`Within next 3 weeks: ${filtered.length}\n`);
 
-  const upserted = await upsertEvents(allEvents);
+  const upserted = await upsertEvents(filtered);
   console.log(`Events upserted: ${upserted}`);
+
+  // Mark events that have already passed
+  const pastCount = await markPastEvents();
+  console.log(`Events marked as past: ${pastCount}`);
 }
 
 // Allow running directly

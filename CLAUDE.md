@@ -1,19 +1,39 @@
 # chiirl - Chicago Events Aggregator
 
-Scrapes events from Luma and Meetup Chicago, stores in Postgres, sends daily SMS digests via Twilio with click tracking.
+Scrapes events from Luma and Meetup Chicago, stores in Postgres, sends daily email digests via Resend and push notifications. SvelteKit PWA frontend for browsing, submitting, and managing events.
+
+## Architecture (3 Railway Services)
+
+1. **Backend/Cron** (Bun) — scrapes events, sends email digests + push notifications, health check
+2. **PostgreSQL** — shared database
+3. **Frontend** (SvelteKit + adapter-node) — PWA with event browsing, filtering, signup, submission, admin
 
 ## Commands
-- `docker compose up -d` - Start Postgres
-- `bun run db:setup` - Apply database schema
-- `bun run scrape` - Scrape events from Luma & Meetup
-- `bun run broadcast` - Send daily SMS to users
-- `bun run dev` - Start click tracking server (hot reload)
-- `bun run serve` - Start click tracking server (production)
+
+### Backend (root)
+- `docker compose up -d` — Start local Postgres
+- `bun run db:setup` — Apply database schema (destructive)
+- `bun run scrape` — Scrape events from Luma & Meetup
+- `bun run broadcast` — Send email digests via Resend
+- `bun run push-notify` — Send push notifications
+- `bun run dev` — Start backend with hot reload (cron + health server)
+- `bun run start` — Start backend (production)
+
+### Frontend (`cd frontend/`)
+- `bun install` — Install frontend deps
+- `bun run dev` — Start SvelteKit dev server (port 5173)
+- `bun run build` — Build for production
+- `bun run preview` — Preview production build
 
 ## Project Structure
-- `src/` - Core app code (db, types, server, utils)
-- `skills/scrape/` - Event scraping skill (SKILL.md + scripts/)
-- `skills/broadcast/` - SMS broadcast skill (SKILL.md + scripts/)
+- `src/` — Core backend code (db, types, server)
+- `skills/scrape/` — Event scraping (SKILL.md + scripts/)
+- `skills/broadcast/` — Email digest + push notifications (SKILL.md + scripts/)
+- `frontend/` — SvelteKit PWA
+  - `src/routes/` — Pages and API routes
+  - `src/lib/server/db.ts` — Postgres connection (uses `postgres` npm package)
+  - `src/lib/utils.ts` — Shared utilities (date formatting, tag colors)
+  - `static/` — PWA manifest, icons
 
 ## Bun Conventions
 
@@ -21,104 +41,58 @@ Default to using Bun instead of Node.js.
 
 - Use `bun <file>` instead of `node <file>` or `ts-node <file>`
 - Use `bun test` instead of `jest` or `vitest`
-- Use `bun build <file.html|file.ts|file.css>` instead of `webpack` or `esbuild`
 - Use `bun install` instead of `npm install` or `yarn install` or `pnpm install`
-- Use `bun run <script>` instead of `npm run <script>` or `yarn run <script>` or `pnpm run <script>`
+- Use `bun run <script>` instead of `npm run <script>`
 - Use `bunx <package> <command>` instead of `npx <package> <command>`
 - Bun automatically loads .env, so don't use dotenv.
 
-## APIs
+## Backend APIs
 
-- `Bun.serve()` supports WebSockets, HTTPS, and routes. Don't use `express`.
-- `bun:sqlite` for SQLite. Don't use `better-sqlite3`.
-- `Bun.redis` for Redis. Don't use `ioredis`.
-- `Bun.sql` for Postgres. Don't use `pg` or `postgres.js`.
-- `WebSocket` is built-in. Don't use `ws`.
-- Prefer `Bun.file` over `node:fs`'s readFile/writeFile
+- `Bun.serve()` for the health check server. Don't use `express`.
+- `Bun.sql` for Postgres in the backend. Don't use `pg` or `postgres.js`.
+- Prefer `Bun.file` over `node:fs`
 - Bun.$`ls` instead of execa.
+
+## Frontend Notes
+
+- SvelteKit 5 with runes mode (`$state`, `$derived`, `$effect`, `$props`)
+- Uses `postgres` npm package for DB access (runs on Node via adapter-node, not Bun)
+- Always add keys to `{#each}` blocks
+- Chicago Editorial design: Fraunces + Source Sans 3, brick red / cream / charcoal palette
+
+## Environment Variables
+
+### Backend
+- `DATABASE_URL` — Postgres connection string
+- `RESEND_API_KEY` — Resend email API key
+- `RESEND_FROM_EMAIL` — Sender email address
+- `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` — Web push keys
+- `FRONTEND_URL` — Frontend URL for email links
+- `PORT` — Health check server port (default 3000)
+
+### Frontend
+- `DATABASE_URL` — Same Postgres connection
+- `RESEND_API_KEY` — For sending magic link emails
+- `RESEND_FROM_EMAIL` — Sender email address
+- `VAPID_PUBLIC_KEY` — For client-side push subscription
+- `ADMIN_EMAILS` — Comma-separated admin emails (e.g. `admin@example.com,alice@co.com`)
+- `ORIGIN` — Frontend URL (required by adapter-node)
+
+## Auth
+- Magic link authentication via Resend (no passwords)
+- `/login` — enter email → receive magic link → click to sign in
+- `/auth/verify?token=xxx` — verifies token, creates session
+- Sessions stored in DB, resolved via `hooks.server.ts` → `locals.user`
+- Admin access: if user's email is in `ADMIN_EMAILS` env var
 
 ## Testing
 
 Use `bun test` to run tests.
 
-```ts#index.test.ts
+```ts
 import { test, expect } from "bun:test";
 
 test("hello world", () => {
   expect(1).toBe(1);
 });
 ```
-
-## Frontend
-
-Use HTML imports with `Bun.serve()`. Don't use `vite`. HTML imports fully support React, CSS, Tailwind.
-
-Server:
-
-```ts#index.ts
-import index from "./index.html"
-
-Bun.serve({
-  routes: {
-    "/": index,
-    "/api/users/:id": {
-      GET: (req) => {
-        return new Response(JSON.stringify({ id: req.params.id }));
-      },
-    },
-  },
-  // optional websocket support
-  websocket: {
-    open: (ws) => {
-      ws.send("Hello, world!");
-    },
-    message: (ws, message) => {
-      ws.send(message);
-    },
-    close: (ws) => {
-      // handle close
-    }
-  },
-  development: {
-    hmr: true,
-    console: true,
-  }
-})
-```
-
-HTML files can import .tsx, .jsx or .js files directly and Bun's bundler will transpile & bundle automatically. `<link>` tags can point to stylesheets and Bun's CSS bundler will bundle.
-
-```html#index.html
-<html>
-  <body>
-    <h1>Hello, world!</h1>
-    <script type="module" src="./frontend.tsx"></script>
-  </body>
-</html>
-```
-
-With the following `frontend.tsx`:
-
-```tsx#frontend.tsx
-import React from "react";
-import { createRoot } from "react-dom/client";
-
-// import .css files directly and it works
-import './index.css';
-
-const root = createRoot(document.body);
-
-export default function Frontend() {
-  return <h1>Hello, world!</h1>;
-}
-
-root.render(<Frontend />);
-```
-
-Then, run index.ts
-
-```sh
-bun --hot ./index.ts
-```
-
-For more information, read the Bun API docs in `node_modules/bun-types/docs/**.mdx`.
