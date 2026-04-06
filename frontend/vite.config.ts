@@ -17,5 +17,9 @@ export default defineConfig(({ mode }) => {
 
 	return {
 		plugins: [sveltekit()],
+		ssr: {
+			noExternal: [],
+			external: ['web-push'],
+		},
 	};
 });
