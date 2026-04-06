@@ -22,7 +22,7 @@ async function browserEval(jsFile: string): Promise<string> {
     .replace(/\n/g, " ")
     .replace(/\s+/g, " ")
     .trim();
-  const result = await $`npx agent-browser eval ${oneLine}`.quiet().text();
+  const result = await $`bunx agent-browser eval ${oneLine}`.quiet().text();
   return result.trim();
 }
 
