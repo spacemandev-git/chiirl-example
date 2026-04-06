@@ -4,7 +4,7 @@ import type { ChiEvent } from "../../../src/types";
 
 async function ab(...args: string[]): Promise<string> {
   try {
-    const result = await $`bunx agent-browser ${args}`.quiet().text();
+    const result = await $`./node_modules/.bin/agent-browser ${args}`.quiet().text();
     return result.trim();
   } catch (err: any) {
     if (err?.stderr?.includes("Timeout")) {
