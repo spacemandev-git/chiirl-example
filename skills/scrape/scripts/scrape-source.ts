@@ -141,6 +141,42 @@ async function scrollUntilCutoff(
   return parsed;
 }
 
+const MAX_DETAIL_FETCHES = 50; // cap detail page visits per source
+
+/**
+ * Visit each event's detail page and extract the description.
+ * Reuses the current browser session. Caps at MAX_DETAIL_FETCHES to keep scrape time reasonable.
+ */
+async function fetchDescriptions(
+  events: ChiEvent[],
+  extractScript: string,
+  sourceName: string,
+): Promise<void> {
+  const toFetch = events.slice(0, MAX_DETAIL_FETCHES);
+  if (events.length > MAX_DETAIL_FETCHES) {
+    console.error(`  Capping detail fetches to ${MAX_DETAIL_FETCHES}/${events.length} ${sourceName} events`);
+  } else {
+    console.error(`  Fetching descriptions for ${toFetch.length} ${sourceName} events...`);
+  }
+  for (let i = 0; i < toFetch.length; i++) {
+    const event = toFetch[i]!;
+    try {
+      await ab("open", event.url);
+      await ab("wait", "--load", "networkidle");
+      await ab("wait", "2000");
+      const raw = await browserEval(extractScript);
+      const desc = raw.startsWith('"') ? JSON.parse(raw) : raw;
+      if (typeof desc === "string" && desc.length > 10) {
+        event.description = desc.slice(0, 2000);
+        event.tags = classifyEvent(event.title, event.description);
+      }
+      console.error(`    [${i + 1}/${toFetch.length}] ${event.title.slice(0, 40)}... ✓`);
+    } catch (err) {
+      console.error(`    [${i + 1}/${toFetch.length}] ${event.title.slice(0, 40)}... failed`);
+    }
+  }
+}
+
 async function scrapeLuma(): Promise<ChiEvent[]> {
   console.error("Scraping Luma Chicago...");
   const events: ChiEvent[] = [];
@@ -169,6 +205,8 @@ async function scrapeLuma(): Promise<ChiEvent[]> {
         tags,
       });
     }
+    // Fetch descriptions from detail pages
+    await fetchDescriptions(events, import.meta.dir + "/extract-luma-detail.js", "Luma");
   } catch (err) {
     console.error("Error scraping Luma:", err);
   }
@@ -211,6 +249,8 @@ async function scrapeMeetup(): Promise<ChiEvent[]> {
         tags,
       });
     }
+    // Fetch descriptions from detail pages
+    await fetchDescriptions(events, import.meta.dir + "/extract-meetup-detail.js", "Meetup");
   } catch (err) {
     console.error("Error scraping Meetup:", err);
   }
@@ -251,6 +291,8 @@ async function scrapeEventbrite(): Promise<ChiEvent[]> {
         tags,
       });
     }
+    // Fetch descriptions from detail pages
+    await fetchDescriptions(events, import.meta.dir + "/extract-eventbrite-detail.js", "Eventbrite");
   } catch (err) {
     console.error("Error scraping Eventbrite:", err);
   }
@@ -265,7 +307,7 @@ async function scrapePie(): Promise<ChiEvent[]> {
   const events: ChiEvent[] = [];
 
   try {
-    await ab("open", "https://www.getpie.app/?city=chicago");
+    await ab("open", "https://www.getpie.app/chicago");
 
     const parsed = await scrollUntilCutoff(
       import.meta.dir + "/extract-pie.js",
@@ -292,6 +334,8 @@ async function scrapePie(): Promise<ChiEvent[]> {
         tags,
       });
     }
+    // Fetch descriptions from detail pages
+    await fetchDescriptions(events, import.meta.dir + "/extract-pie-detail.js", "Pie");
   } catch (err) {
     console.error("Error scraping Pie:", err);
   }
