@@ -1,7 +1,7 @@
 FROM oven/bun:1-debian
 WORKDIR /app
 COPY package.json bun.lock ./
-RUN bun install --production
+RUN bun install
 RUN bunx playwright install --with-deps chromium
 COPY . .
 EXPOSE 3000
