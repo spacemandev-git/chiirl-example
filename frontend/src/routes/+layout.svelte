@@ -12,7 +12,9 @@
 			</a>
 			<nav class="nav">
 				<a href="/" class="nav-link">Events</a>
-				<a href="/team" class="nav-link">Team</a>
+				<a href="/about" class="nav-link">About</a>
+				<a href="/standards" class="nav-link">Standards</a>
+				<a href="/get-involved" class="nav-link">Get Involved</a>
 				<a href="/submit" class="nav-link">Submit</a>
 				{#if data.user}
 					<a href="/settings" class="nav-link">Settings</a>
@@ -52,7 +54,9 @@
 					<a href="/login">Sign In</a>
 				{/if}
 				<a href="/submit">Submit Event</a>
-				<a href="/team">Team</a>
+				<a href="/about">About</a>
+				<a href="/standards">Standards</a>
+				<a href="/get-involved">Volunteer / Sponsor</a>
 			</div>
 		</div>
 	</footer>
