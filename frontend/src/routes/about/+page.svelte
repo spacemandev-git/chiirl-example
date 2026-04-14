@@ -77,25 +77,6 @@
 	</div>
 </section>
 
-<section class="about-section">
-	<div class="container narrow">
-		<p class="about-text">
-			The Chi-IRL team scrapes and aggregates events from Luma, Pie, Meet-Up, Eventbrite,
-			LinkedIn and dozens of host organizations to bring you a comprehensive list of quality
-			technology-focused events every Monday.
-		</p>
-		<p class="about-text">
-			We are a service provided by the <a
-				href="https://chicagotech.org"
-				target="_blank"
-				rel="noopener noreferrer">Chicago Technology Collaborative (CTC)</a
-			>, an NGO and group of volunteers with a mission to unify and strengthen our city's tech
-			ecosystem by fostering meaningful connections between founders, investors, engineers, and
-			community builders. Check the home website for our other programs and to become a
-			volunteer.
-		</p>
-	</div>
-</section>
 
 <section class="history-section">
 	<div class="container">
@@ -207,31 +188,6 @@
 	.about-sub {
 		font-size: 1rem;
 		color: var(--gray);
-	}
-
-	.about-section {
-		padding: 32px 0 24px;
-	}
-
-	.narrow {
-		max-width: 720px;
-	}
-
-	.about-text {
-		font-size: 1.05rem;
-		line-height: 1.7;
-		color: var(--gray);
-		margin-bottom: 20px;
-	}
-
-	.about-text a {
-		color: var(--chi-blue);
-		text-decoration: underline;
-		text-underline-offset: 3px;
-	}
-
-	.about-text a:hover {
-		color: var(--white);
 	}
 
 	.history-section {

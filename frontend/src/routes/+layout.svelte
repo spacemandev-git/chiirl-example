@@ -2,6 +2,12 @@
 	import '../app.css';
 
 	let { children, data } = $props();
+
+	let menuOpen = $state(false);
+
+	function closeMenu() {
+		menuOpen = false;
+	}
 </script>
 
 <div class="app">
@@ -28,8 +34,36 @@
 					<a href="/login" class="nav-link nav-cta">Sign In</a>
 				{/if}
 			</nav>
+			<button class="hamburger" onclick={() => menuOpen = !menuOpen} aria-label="Toggle menu">
+				<span class="hamburger-line" class:open={menuOpen}></span>
+				<span class="hamburger-line" class:open={menuOpen}></span>
+				<span class="hamburger-line" class:open={menuOpen}></span>
+			</button>
 		</div>
 	</header>
+
+	{#if menuOpen}
+		<!-- svelte-ignore a11y_no_static_element_interactions -->
+		<div class="mobile-overlay" onclick={closeMenu} onkeydown={closeMenu}></div>
+		<nav class="mobile-menu">
+			<a href="/" class="mobile-link" onclick={closeMenu}>Events</a>
+			<a href="/about" class="mobile-link" onclick={closeMenu}>About</a>
+			<a href="/standards" class="mobile-link" onclick={closeMenu}>Standards</a>
+			<a href="/get-involved" class="mobile-link" onclick={closeMenu}>Get Involved</a>
+			<a href="/submit" class="mobile-link" onclick={closeMenu}>Submit</a>
+			{#if data.user}
+				<a href="/settings" class="mobile-link" onclick={closeMenu}>Settings</a>
+				{#if data.isAdmin}
+					<a href="/admin" class="mobile-link mobile-admin" onclick={closeMenu}>Admin</a>
+				{/if}
+				<form method="POST" action="/settings?/logout" class="nav-logout-form">
+					<button type="submit" class="mobile-link mobile-logout">Log Out</button>
+				</form>
+			{:else}
+				<a href="/login" class="mobile-link mobile-cta" onclick={closeMenu}>Sign In</a>
+			{/if}
+		</nav>
+	{/if}
 
 	<main>
 		{@render children()}
@@ -207,9 +241,109 @@
 		color: var(--white);
 	}
 
-	@media (max-width: 480px) {
-		.nav-link:not(.nav-cta):not(.nav-admin) {
+	.hamburger {
+		display: none;
+		flex-direction: column;
+		justify-content: center;
+		gap: 5px;
+		background: none;
+		border: none;
+		cursor: pointer;
+		padding: 8px;
+		z-index: 102;
+	}
+
+	.hamburger-line {
+		display: block;
+		width: 22px;
+		height: 2px;
+		background: var(--white);
+		border-radius: 1px;
+		transition: all 0.25s ease;
+		transform-origin: center;
+	}
+
+	.hamburger-line.open:nth-child(1) {
+		transform: translateY(7px) rotate(45deg);
+	}
+
+	.hamburger-line.open:nth-child(2) {
+		opacity: 0;
+	}
+
+	.hamburger-line.open:nth-child(3) {
+		transform: translateY(-7px) rotate(-45deg);
+	}
+
+	.mobile-overlay {
+		display: none;
+		position: fixed;
+		inset: 0;
+		background: rgba(0, 0, 0, 0.6);
+		z-index: 99;
+	}
+
+	.mobile-menu {
+		display: none;
+		position: fixed;
+		top: 64px;
+		left: 0;
+		right: 0;
+		background: var(--black);
+		border-bottom: 1px solid var(--border);
+		z-index: 101;
+		padding: 12px 0;
+		flex-direction: column;
+	}
+
+	.mobile-link {
+		display: block;
+		padding: 12px 24px;
+		font-size: 0.9rem;
+		font-weight: 600;
+		color: var(--gray);
+		text-transform: uppercase;
+		letter-spacing: 0.06em;
+		transition: all 0.15s ease;
+	}
+
+	.mobile-link:hover {
+		background: var(--black-hover);
+		color: var(--white);
+	}
+
+	.mobile-admin {
+		color: var(--chi-blue);
+	}
+
+	.mobile-cta {
+		color: var(--star-red);
+	}
+
+	.mobile-logout {
+		width: 100%;
+		text-align: left;
+		background: none;
+		border: none;
+		cursor: pointer;
+		font-family: inherit;
+	}
+
+	@media (max-width: 768px) {
+		.nav {
 			display: none;
+		}
+
+		.hamburger {
+			display: flex;
+		}
+
+		.mobile-overlay {
+			display: block;
+		}
+
+		.mobile-menu {
+			display: flex;
 		}
 
 		.footer-inner {

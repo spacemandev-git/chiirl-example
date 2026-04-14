@@ -26,12 +26,6 @@ const TAG_KEYWORDS: Record<string, string[]> = {
 	'sales': ['sales', 'revenue', 'closing', 'b2b', 'enterprise sales', 'sales strategy'],
 	'scaling': ['scaling', 'scale', 'growth stage', 'hypergrowth', 'expansion'],
 	'uiux-cx': ['ux', 'ui', 'design', 'user experience', 'customer experience', 'cx', 'usability'],
-	'concept': ['idea stage', 'concept', 'ideation', 'validation', 'pre-launch'],
-	'pre-seed': ['pre-seed', 'preseed'],
-	'seed': ['seed stage', 'seed round', 'seed funding'],
-	'series-a': ['series a', 'series-a'],
-	'growth': ['growth stage', 'series b', 'series c', 'growth equity'],
-	'late-stage': ['late stage', 'late-stage', 'ipo', 'pre-ipo', 'public market'],
 };
 
 function classifyEvent(title: string, description: string): string[] {

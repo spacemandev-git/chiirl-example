@@ -119,9 +119,6 @@
 				{/each}
 			</div>
 
-			<p class="block-text note">
-				We also tag by business stage — concept to late-stage — when relevant.
-			</p>
 
 			<p class="block-text">
 				We follow and partner with several voices in the tech community to keep abreast of

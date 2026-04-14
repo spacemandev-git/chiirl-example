@@ -23,13 +23,7 @@ DO $$ BEGIN
     'policy',
     'sales',
     'scaling',
-    'uiux-cx',
-    'concept',
-    'pre-seed',
-    'seed',
-    'series-a',
-    'growth',
-    'late-stage'
+    'uiux-cx'
   );
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
@@ -178,12 +172,6 @@ DO $$ BEGIN ALTER TYPE event_tag ADD VALUE IF NOT EXISTS 'pitching-howto'; EXCEP
 DO $$ BEGIN ALTER TYPE event_tag ADD VALUE IF NOT EXISTS 'policy'; EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 DO $$ BEGIN ALTER TYPE event_tag ADD VALUE IF NOT EXISTS 'scaling'; EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 DO $$ BEGIN ALTER TYPE event_tag ADD VALUE IF NOT EXISTS 'uiux-cx'; EXCEPTION WHEN duplicate_object THEN NULL; END $$;
-DO $$ BEGIN ALTER TYPE event_tag ADD VALUE IF NOT EXISTS 'concept'; EXCEPTION WHEN duplicate_object THEN NULL; END $$;
-DO $$ BEGIN ALTER TYPE event_tag ADD VALUE IF NOT EXISTS 'pre-seed'; EXCEPTION WHEN duplicate_object THEN NULL; END $$;
-DO $$ BEGIN ALTER TYPE event_tag ADD VALUE IF NOT EXISTS 'seed'; EXCEPTION WHEN duplicate_object THEN NULL; END $$;
-DO $$ BEGIN ALTER TYPE event_tag ADD VALUE IF NOT EXISTS 'series-a'; EXCEPTION WHEN duplicate_object THEN NULL; END $$;
-DO $$ BEGIN ALTER TYPE event_tag ADD VALUE IF NOT EXISTS 'growth'; EXCEPTION WHEN duplicate_object THEN NULL; END $$;
-DO $$ BEGIN ALTER TYPE event_tag ADD VALUE IF NOT EXISTS 'late-stage'; EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- Migrate: add digest frequency columns to existing users table
 ALTER TABLE users ADD COLUMN IF NOT EXISTS email_frequency digest_frequency NOT NULL DEFAULT 'daily';

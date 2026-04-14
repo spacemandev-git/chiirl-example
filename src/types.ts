@@ -24,13 +24,6 @@ export const EVENT_TAGS = [
   "sales",
   "scaling",
   "uiux-cx",
-  // Business stage
-  "concept",
-  "pre-seed",
-  "seed",
-  "series-a",
-  "growth",
-  "late-stage",
 ] as const;
 
 export type EventTag = (typeof EVENT_TAGS)[number];
@@ -140,13 +133,6 @@ export function classifyEvent(title: string, description?: string): EventTag[] {
     "sales": ["sales", "revenue", "closing", "b2b", "enterprise sales", "sales strategy"],
     "scaling": ["scaling", "scale", "growth stage", "hypergrowth", "expansion"],
     "uiux-cx": ["ux", "ui", "design", "user experience", "customer experience", "cx", "usability"],
-    // Business stage
-    "concept": ["idea stage", "concept", "ideation", "validation", "pre-launch"],
-    "pre-seed": ["pre-seed", "preseed"],
-    "seed": ["seed stage", "seed round", "seed funding"],
-    "series-a": ["series a", "series-a"],
-    "growth": ["growth stage", "series b", "series c", "growth equity"],
-    "late-stage": ["late stage", "late-stage", "ipo", "pre-ipo", "public market"],
   };
 
   const matched: EventTag[] = [];

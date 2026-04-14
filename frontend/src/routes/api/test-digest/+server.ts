@@ -45,12 +45,6 @@ const TAG_COLORS: Record<string, string> = {
 	sales: '#C0392B',
 	scaling: '#16A085',
 	'uiux-cx': '#AF7AC5',
-	concept: '#95A5A6',
-	'pre-seed': '#BDC3C7',
-	seed: '#82C46C',
-	'series-a': '#5DADE2',
-	growth: '#F39C12',
-	'late-stage': '#34495E',
 };
 
 function formatDateTime(date: Date): string {

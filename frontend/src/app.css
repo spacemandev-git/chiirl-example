@@ -135,12 +135,6 @@ input::placeholder, textarea::placeholder {
 .tag-sales { --tag-color: #C0392B; }
 .tag-scaling { --tag-color: #16A085; }
 .tag-uiux-cx { --tag-color: #AF7AC5; }
-.tag-concept { --tag-color: #95A5A6; }
-.tag-pre-seed { --tag-color: #BDC3C7; }
-.tag-seed { --tag-color: #82C46C; }
-.tag-series-a { --tag-color: #5DADE2; }
-.tag-growth { --tag-color: #F39C12; }
-.tag-late-stage { --tag-color: #34495E; }
 
 .tag-pill {
 	display: inline-flex;

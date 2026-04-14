@@ -5,8 +5,6 @@ export const EVENT_TAGS = [
 	'branding', 'business-strategy', 'capital-deployment', 'code-engineering',
 	'finance', 'fundraising', 'gtm', 'legal-ip', 'marketing', 'org-management',
 	'recruiting', 'product', 'pitching-howto', 'policy', 'sales', 'scaling', 'uiux-cx',
-	// Business stage
-	'concept', 'pre-seed', 'seed', 'series-a', 'growth', 'late-stage',
 ] as const;
 
 export type EventTag = (typeof EVENT_TAGS)[number];
@@ -37,13 +35,6 @@ export const TAG_COLORS: Record<string, string> = {
 	'sales': '#C0392B',
 	'scaling': '#16A085',
 	'uiux-cx': '#AF7AC5',
-	// Business stage
-	'concept': '#95A5A6',
-	'pre-seed': '#BDC3C7',
-	'seed': '#82C46C',
-	'series-a': '#5DADE2',
-	'growth': '#F39C12',
-	'late-stage': '#34495E',
 };
 
 export function formatDate(date: string | Date): string {
