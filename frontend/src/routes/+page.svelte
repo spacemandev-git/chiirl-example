@@ -7,6 +7,16 @@
 	let searchInput = $state(data.filters.q);
 	let selectedTags = $state<string[]>([...data.filters.tags]);
 	let selectedRange = $state(data.filters.range);
+	let tagDrawerOpen = $state(false);
+
+	function closeTagDrawer() {
+		tagDrawerOpen = false;
+	}
+
+	function clearAllTags() {
+		selectedTags = [];
+		applyFilters();
+	}
 
 	// Re-sync from server data when URL changes
 	$effect(() => {
@@ -132,7 +142,7 @@
 			{/each}
 		</div>
 
-		<div class="tag-filters">
+		<div class="tag-filters desktop-tags">
 			{#each EVENT_TAGS as tag (tag)}
 				<button
 					class="tag-chip tag-{tag}"
@@ -144,8 +154,60 @@
 				</button>
 			{/each}
 		</div>
+
+		<div class="mobile-tag-trigger">
+			<button class="tag-trigger-btn" onclick={() => (tagDrawerOpen = true)}>
+				<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+					<path d="M3 6h18M6 12h12M10 18h4" />
+				</svg>
+				<span>Filter by tag</span>
+				{#if selectedTags.length > 0}
+					<span class="tag-count">{selectedTags.length}</span>
+				{/if}
+			</button>
+			{#if selectedTags.length > 0}
+				<div class="active-tags-preview">
+					{#each selectedTags as tag (tag)}
+						<span class="tag-pill tag-{tag}" style="--tag-color: {TAG_COLORS[tag]}">{tag}</span>
+					{/each}
+				</div>
+			{/if}
+		</div>
 	</div>
 </section>
+
+{#if tagDrawerOpen}
+	<div class="drawer-backdrop" onclick={closeTagDrawer} role="presentation"></div>
+	<aside class="tag-drawer" role="dialog" aria-label="Filter by tag">
+		<header class="drawer-header">
+			<h2 class="drawer-title">Filter by tag</h2>
+			<button class="drawer-close" onclick={closeTagDrawer} aria-label="Close">&times;</button>
+		</header>
+		<div class="drawer-actions">
+			<span class="drawer-count">
+				{selectedTags.length} selected
+			</span>
+			{#if selectedTags.length > 0}
+				<button class="drawer-clear" onclick={clearAllTags}>Clear all</button>
+			{/if}
+		</div>
+		<div class="drawer-tags">
+			{#each EVENT_TAGS as tag (tag)}
+				<button
+					class="tag-chip tag-{tag}"
+					class:selected={selectedTags.includes(tag)}
+					onclick={() => toggleTag(tag)}
+					style="--tag-color: {TAG_COLORS[tag]}"
+				>
+					{tag}
+				</button>
+			{/each}
+		</div>
+		<div class="drawer-footer">
+			<button class="drawer-apply" onclick={closeTagDrawer}>Done</button>
+		</div>
+	</aside>
+{/if}
 
 <section class="events-section">
 	<div class="container">
@@ -386,6 +448,153 @@
 		gap: 4px;
 	}
 
+	.mobile-tag-trigger {
+		display: none;
+	}
+
+	.tag-trigger-btn {
+		display: inline-flex;
+		align-items: center;
+		gap: 8px;
+		padding: 8px 14px;
+		border: 1.5px solid var(--border-light);
+		border-radius: var(--radius-sm);
+		background: var(--black-card);
+		color: var(--white-dim);
+		font-size: 0.78rem;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.06em;
+	}
+
+	.tag-count {
+		background: var(--chi-blue);
+		color: var(--white);
+		font-size: 0.7rem;
+		padding: 1px 7px;
+		border-radius: 999px;
+		font-weight: 800;
+	}
+
+	.active-tags-preview {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 4px;
+		margin-top: 8px;
+	}
+
+	/* Drawer */
+	.drawer-backdrop {
+		position: fixed;
+		inset: 0;
+		background: rgba(0, 0, 0, 0.6);
+		backdrop-filter: blur(4px);
+		z-index: 100;
+		animation: fadeIn 0.18s ease;
+	}
+
+	.tag-drawer {
+		position: fixed;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		width: min(88vw, 360px);
+		background: var(--black);
+		border-left: 1px solid var(--border);
+		z-index: 101;
+		display: flex;
+		flex-direction: column;
+		animation: slideInRight 0.22s ease;
+	}
+
+	.drawer-header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 18px 20px;
+		border-bottom: 1px solid var(--border);
+	}
+
+	.drawer-title {
+		font-family: var(--font-display);
+		font-size: 1.3rem;
+		font-weight: 700;
+		color: var(--white);
+	}
+
+	.drawer-close {
+		font-size: 1.8rem;
+		line-height: 1;
+		color: var(--gray);
+		padding: 0 8px;
+		background: transparent;
+		border: none;
+	}
+
+	.drawer-actions {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 12px 20px;
+		border-bottom: 1px solid var(--border);
+	}
+
+	.drawer-count {
+		font-size: 0.75rem;
+		color: var(--gray);
+		text-transform: uppercase;
+		letter-spacing: 0.08em;
+		font-weight: 700;
+	}
+
+	.drawer-clear {
+		font-size: 0.75rem;
+		color: var(--star-red);
+		text-transform: uppercase;
+		letter-spacing: 0.06em;
+		font-weight: 700;
+		background: transparent;
+		border: none;
+	}
+
+	.drawer-tags {
+		flex: 1;
+		overflow-y: auto;
+		padding: 16px 20px;
+		display: flex;
+		flex-wrap: wrap;
+		gap: 6px;
+		align-content: flex-start;
+	}
+
+	.drawer-footer {
+		padding: 14px 20px;
+		border-top: 1px solid var(--border);
+	}
+
+	.drawer-apply {
+		width: 100%;
+		padding: 12px;
+		background: var(--white);
+		color: var(--black);
+		border: none;
+		border-radius: var(--radius-sm);
+		font-weight: 700;
+		font-size: 0.85rem;
+		text-transform: uppercase;
+		letter-spacing: 0.08em;
+	}
+
+	@keyframes fadeIn {
+		from { opacity: 0; }
+		to { opacity: 1; }
+	}
+
+	@keyframes slideInRight {
+		from { transform: translateX(100%); }
+		to { transform: translateX(0); }
+	}
+
 	.tag-chip {
 		padding: 4px 12px;
 		border-radius: 2px;
@@ -544,6 +753,14 @@
 
 		.events-grid {
 			grid-template-columns: 1fr;
+		}
+
+		.desktop-tags {
+			display: none;
+		}
+
+		.mobile-tag-trigger {
+			display: block;
 		}
 	}
 </style>
